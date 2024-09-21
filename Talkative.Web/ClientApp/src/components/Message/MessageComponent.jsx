@@ -2,7 +2,7 @@
   return (
       <div className="mb-2 relative">
         <div className="font-bold text-gray-300">{props.sender.username}
-          <span className="text-gray-800 text-xs ml-2">
+          <span className="text-gray-600 text-xs ml-2">
             {
               new Date(props.createdAt * 1000).toLocaleDateString([], {
                 year: 'numeric',
