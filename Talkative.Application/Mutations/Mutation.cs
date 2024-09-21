@@ -1,5 +1,6 @@
 ﻿using HotChocolate;
 using HotChocolate.Authorization;
+using HotChocolate.Subscriptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Talkative.Application.Helpers;
@@ -9,7 +10,7 @@ using Talkative.Infrastructure.Context;
 
 namespace Talkative.Application.Mutations;
 
-public class Mutation : IRoomMutation
+public class Mutation : IRoomMutation, IMessageMutation
 {
     [Authorize]
     public async Task<Room> CreateRoom(
@@ -54,4 +55,51 @@ public class Mutation : IRoomMutation
 
         return room;
     }
+    
+    [Authorize]
+    public async Task<Message> SendMessage(
+        Guid roomId,
+        string content,
+        [Service] ApplicationContext context,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] ITopicEventSender sender)
+    {
+        var userId = httpContextAccessor.GetUserIdFromJwt();
+
+        var room = await context.Rooms
+            .Include(x => x.Users)
+            .Include(x => x.Messages)
+            .FirstOrDefaultAsync(x => x.Id == roomId);
+
+        if (room == null)
+        {
+            throw new Exception("Room was not found");
+        }
+
+        var hasUser = room.Users.Any(x => x.Id == userId);
+
+        if (!hasUser)
+        {
+            throw new Exception("You are not part of this room and cannot send messages.");
+        }
+
+        var message = new Message
+        {
+            Id = Guid.NewGuid(),
+            Content = content,
+            CreatedAt = DateTimeOffset.Now.ToUnixTimeSeconds(),
+            EditedAt = DateTimeOffset.Now.ToUnixTimeSeconds(),
+            SenderId = userId,
+            RoomId = roomId
+        };
+
+        await context.Messages.AddAsync(message);
+        await context.SaveChangesAsync();
+
+        await sender.SendAsync($"MessageCreated_{roomId}", message);
+        Console.WriteLine($"Message sent to room {roomId} by user {userId}");
+        
+        return message;
+    }
+
 }

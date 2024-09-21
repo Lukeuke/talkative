@@ -22,6 +22,8 @@ public class Query : IRoomQuery, IMessageQuery
 
         var user = await context.Users
             .Include(x => x.Rooms)
+            .ThenInclude(x => x.Users)
+            .ThenInclude(x => x.Messages)
             .FirstOrDefaultAsync(x => x.Id == userId);
 
         if (user is null)

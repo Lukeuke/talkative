@@ -49,8 +49,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddGraphQLServer()
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
-    /*.AddSubscriptionType<Subscription>()
-    .AddInMemorySubscriptions()*/
+    .AddSubscriptionType<Subscription>()
+    .AddInMemorySubscriptions()
     .AddFiltering()
     .AddSorting()
     .AddAuthorization();
@@ -78,7 +78,6 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseWebSockets();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -86,10 +85,7 @@ app.UseAuthorization();
 app.AddIdentityEndpoint();
 
 // GraphQL
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapGraphQL();
-});
+app.MapGraphQL();
 
 app.MapControllerRoute(
     name: "default",
