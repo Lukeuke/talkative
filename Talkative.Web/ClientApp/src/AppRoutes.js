@@ -1,6 +1,7 @@
-import { Counter } from "./components/Counter";
-import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
+import SignIn from "./pages/identity/SignIn";
+import SignUp from "./pages/identity/SignUp";
+import GroupPage from "./pages/group/Group";
 
 const AppRoutes = [
   {
@@ -8,12 +9,16 @@ const AppRoutes = [
     element: <Home />
   },
   {
-    path: '/counter',
-    element: <Counter />
+    path: "/sign-in",
+    element: <SignIn />
   },
   {
-    path: '/fetch-data',
-    element: <FetchData />
+    path: "/sign-up",
+    element: <SignUp />
+  },
+  {
+    path: "/group/:id",
+    element: <GroupPage />
   }
 ];
 

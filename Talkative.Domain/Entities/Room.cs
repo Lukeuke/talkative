@@ -11,6 +11,11 @@ public class Room
 
     public required Guid OwnerId { get; set; }
 
+    [UseFiltering]
+    [UseSorting]
     public virtual List<User> Users { get; set; } = null!;
+    
+    [UseFiltering]
+    [UseSorting]
     public virtual List<Message> Messages { get; set; } = null!;
 }

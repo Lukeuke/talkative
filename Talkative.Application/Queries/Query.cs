@@ -31,6 +31,13 @@ public class Query : IRoomQuery, IMessageQuery
             throw new Exception($"User with ID: {userId} was not found.");
         }
 
+        foreach (var room in user.Rooms)
+        {
+            room.Messages ??= new List<Message>();
+
+            room.Users ??= new List<User>();
+        }
+        
         return user.Rooms;
     }
 
