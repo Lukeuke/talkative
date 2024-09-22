@@ -102,6 +102,11 @@ export default function GroupPage() {
         {
           next(data) {
             console.log('Received data:', data);
+            
+            if (data.data.allGroupMessages.roomId !== id) {
+              return;
+            }
+            
             setMessages(prevMessages => [...prevMessages, data.data.allGroupMessages]);
           },
           error(err) {
