@@ -98,7 +98,8 @@ public class Mutation : IRoomMutation, IMessageMutation
         await context.Messages.AddAsync(message);
         await context.SaveChangesAsync();
 
-        await sender.SendAsync($"MessageCreated_{roomId}", message);
+        // await sender.SendAsync($"MessageCreated_{roomId}", message);
+        await sender.SendAsync($"MessageCreated", message);
         Console.WriteLine($"Message sent to room {roomId} by user {userId}");
         
         return message;

@@ -33,7 +33,10 @@ export const NavMenu = () => {
         </div>
     );
   }
-  if (error) return <p>Error: {error.message}</p>;
+  if (error) {
+    console.error(error.message);
+    return null;
+  }
 
   return (
       <div className="h-screen w-[80px] bg-[#313137] text-white flex flex-col items-center">
