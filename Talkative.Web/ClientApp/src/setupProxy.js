@@ -11,12 +11,10 @@ const context =  [
 
 module.exports = function(app) {
   const appProxy = createProxyMiddleware(context, {
-    proxyTimeout: 10000,
     target: target,
-    secure: false,
-    headers: {
-      Connection: 'Keep-Alive'
-    }
+    ws: true, // Enable WebSocket proxying
+    secure: false, // Set to true in production
+    changeOrigin: true, // Necessary for virtual hosted sites
   });
 
   app.use(appProxy);

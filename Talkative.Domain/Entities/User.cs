@@ -25,6 +25,7 @@ public class User
     public string FullName => $"{FirstName} {LastName}";
 
     public required long CreatedAt { get; set; }
+    public bool OnlineStatus { get; set; } = false;
     
     public virtual List<Room> Rooms { get; set; } = null!;
     public virtual List<Message> Messages { get; set; } = null!;

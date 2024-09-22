@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Talkative.Application.Helpers;
 using Talkative.Application.Mutations.Abstraction;
+using Talkative.Application.Subscriptions;
 using Talkative.Domain.Entities;
+using Talkative.Domain.Models;
 using Talkative.Infrastructure.Context;
 
 namespace Talkative.Application.Mutations;
@@ -102,4 +104,47 @@ public class Mutation : IRoomMutation, IMessageMutation
         return message;
     }
 
+    [Authorize]
+    public async Task<bool> SetUserStatus(
+        Guid roomId, 
+        bool isOnline,
+        [Service] ApplicationContext context,
+        [Service] ITopicEventSender eventSender,
+        [Service] IHttpContextAccessor httpContextAccessor)
+    {
+        var userId = httpContextAccessor.GetUserIdFromJwt();
+        
+        var room = await context.Rooms
+            .Include(x => x.Users)
+            .FirstOrDefaultAsync(x => x.Id == roomId);
+
+        if (room == null)
+        {
+            throw new Exception("Room was not found.");
+        }
+        
+        // if user sends status to room that he is not in.
+        if (room.Users.All(x => x.Id != userId))
+        {
+            throw new Exception("You are not in this room.");
+        }
+        
+        var status = new UserStatus
+        {
+            UserId = userId,
+            RoomId = roomId,
+            IsOnline = isOnline
+        };
+
+        await eventSender.SendAsync(roomId.ToString(), status);
+
+        await context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(b =>
+                b.SetProperty(u => u.OnlineStatus, isOnline)
+            );
+        await context.SaveChangesAsync();
+        
+        return true;
+    }
 }

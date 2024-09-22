@@ -1,4 +1,4 @@
-﻿import { useQuery, gql, useMutation } from '@apollo/client';
+﻿import { useQuery, gql, useMutation, useSubscription } from '@apollo/client';
 import { useParams } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import { validate as isUUID } from 'uuid';
@@ -45,6 +45,28 @@ const SEND_MESSAGE = gql`
       id
       roomId
       senderId
+      sender {
+        id
+        username
+      }
+    }
+  }
+`;
+
+const MESSAGE_CREATED_SUBSCRIPTION = gql`
+  subscription MessageCreated($roomId: UUID!) {
+    messageCreated(roomId: $roomId) {
+      content
+      createdAt
+      editedAt
+      sender {
+        createdAt
+        email
+        firstName
+        fullName
+        lastName
+        username
+      }
     }
   }
 `;
@@ -52,10 +74,11 @@ const SEND_MESSAGE = gql`
 export default function GroupPage() {
   const { id } = useParams();
   const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
   const { loading, error, data } = useQuery(GET_ALL_MESSAGES, {
-    variables: { id: id },
+    variables: { id },
     skip: !id,
   });
 
@@ -63,14 +86,32 @@ export default function GroupPage() {
     variables: { roomId: id, content: message },
     onCompleted: () => {
       setMessage('');
-    }
+    },
   });
+
+  useSubscription(MESSAGE_CREATED_SUBSCRIPTION, {
+    variables: { roomId: id },
+    onSubscriptionData: ({ subscriptionData }) => {
+      console.log("New message received:", subscriptionData.data);
+      const newMessage = subscriptionData.data.messageCreated;
+      setMessages(prevMessages => [...prevMessages, newMessage]);
+    },
+    onError: (error) => {
+      console.error("Subscription error:", error);
+    },
+  });
+
+  useEffect(() => {
+    if (data?.allRooms?.[0]) {
+      setMessages(data.allRooms[0].messages);
+    }
+  }, [data]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [data, message]);
+  }, [messages]);
 
   if (!isUUID(id)) {
     return <p>Invalid room ID format</p>;
@@ -79,7 +120,6 @@ export default function GroupPage() {
   if (error) return <p>Error: {error.message}</p>;
 
   const room = data?.allRooms?.[0];
-  const messages = room?.messages || [];
   const users = room?.users || [];
 
   const handleMessageSent = async (e) => {
