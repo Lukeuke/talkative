@@ -44,6 +44,30 @@ public class Query : IRoomQuery, IMessageQuery
     [Authorize]
     [UseFiltering]
     [UseSorting]
+    public IEnumerable<Invite> GetAllInvites(
+        [Service] ApplicationContext context,
+        [Service] IHttpContextAccessor httpContextAccessor
+        )
+    {
+        var userId = httpContextAccessor.GetUserIdFromJwt();
+
+        return context.Invites.Include(x => x.User).Where(x => x.UserId == userId);
+    }
+
+    [Authorize]
+    [UseFiltering]
+    [UseSorting]
+    public IEnumerable<User> GetAllUsers(
+        [Service] ApplicationContext context,
+        [Service] IHttpContextAccessor httpContextAccessor
+    )
+    {
+        return context.Users;
+    }
+    
+    [Authorize]
+    [UseFiltering]
+    [UseSorting]
     public IEnumerable<Message> GetAllMessages(Guid groupId)
     {
         return new List<Message>();

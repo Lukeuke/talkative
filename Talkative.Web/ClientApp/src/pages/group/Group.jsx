@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { validate as isUUID } from 'uuid';
 import { Message } from "../../components/Message/MessageComponent";
 import { createClient } from 'graphql-sse';
+import {UserPanel} from "../../components/Group/UserPanelComponent";
 
 const client = createClient({
   url: '/graphql',
@@ -181,16 +182,7 @@ export default function GroupPage() {
         </div>
 
         {/* Right Panel for Users */}
-        <div className="w-64 bg-MainDark border-l border-gray-700 p-4 md:block hidden overflow-y-auto">
-          <h2 className="text-lg font-bold text-white mb-2">Users</h2>
-          <ul className="space-y-2">
-            {users.map(user => (
-                <li key={user.id} className="text-white hover:bg-SemiDark p-2 rounded user-list">
-                  {user.fullName} ({user.username})
-                </li>
-            ))}
-          </ul>
-        </div>
+        <UserPanel users={users} roomId={id} />
       </div>
   );
 }

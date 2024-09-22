@@ -55,3 +55,7 @@ export const NavMenu = () => {
       </div>
   );
 };
+
+export const refreshNavMenu = (refetch) => {
+  refetch();
+};

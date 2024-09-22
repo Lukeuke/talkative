@@ -29,4 +29,5 @@ public class User
     
     public virtual List<Room> Rooms { get; set; } = null!;
     public virtual List<Message> Messages { get; set; } = null!;
+    public virtual List<Invite> Invites { get; set; } = null!;
 }

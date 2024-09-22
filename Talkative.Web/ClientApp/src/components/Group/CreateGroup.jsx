@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
-import { gql, useMutation } from "@apollo/client";
+import {gql, useMutation, useQuery} from "@apollo/client";
+import {refreshNavMenu} from "../NavMenu";
 
 const CREATE_ROOM_MUTATION = gql`
   mutation CreateRoom($name: String!) {
@@ -11,10 +12,23 @@ const CREATE_ROOM_MUTATION = gql`
   }
 `;
 
+const GET_ALL_ROOMS = gql`
+  query {
+    allRooms {
+      id
+      name
+      ownerId
+    }
+  }
+`;
+
 export default function CreateGroup() {
   const [groupName, setGroupName] = useState("");
-
+  const { refetch: refetchRooms } = useQuery(GET_ALL_ROOMS);
   const [createRoom, { loading, error, data }] = useMutation(CREATE_ROOM_MUTATION, {
+    onCompleted: (data) => {
+      refreshNavMenu(refetchRooms);
+    },
     variables: { name: groupName },
   });
 

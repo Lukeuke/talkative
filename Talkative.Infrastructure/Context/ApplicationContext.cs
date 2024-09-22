@@ -14,6 +14,7 @@ public class ApplicationContext : DbContext
     {
         modelBuilder.Entity<User>().HasMany(x => x.Messages);
         modelBuilder.Entity<User>().HasMany(x => x.Rooms);
+        modelBuilder.Entity<User>().HasMany(x => x.Invites);
 
         modelBuilder.Entity<Room>().HasMany(x => x.Messages);
         modelBuilder.Entity<Room>().HasMany(x => x.Users);
@@ -25,4 +26,5 @@ public class ApplicationContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Message> Messages { get; set; }
+    public DbSet<Invite> Invites { get; set; }
 }

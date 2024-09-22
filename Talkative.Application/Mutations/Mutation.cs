@@ -148,4 +148,87 @@ public class Mutation : IRoomMutation, IMessageMutation
         
         return true;
     }
+
+    [Authorize]
+    public async Task<bool> InviteUser(
+        string email, 
+        Guid roomId,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] ApplicationContext context
+        )
+    {
+        var userId = httpContextAccessor.GetUserIdFromJwt();
+
+        var room = await context.Rooms.FirstOrDefaultAsync(x => x.Id == roomId);
+
+        if (room is null)
+        {
+            return false;
+        }
+
+        if (room.OwnerId != userId)
+        {
+            return false;
+        }
+
+        var user = await context.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+        if (user is null)
+        {
+            return false;
+        }
+
+        if (context.Invites.Any(x => x.UserId == user.Id && x.RoomId == roomId))
+        {
+            return false;
+        }
+        
+        var invite = new Invite
+        {
+            Id = Guid.NewGuid(),
+            RoomId = roomId,
+            UserId = user.Id,
+            RoomName = room.Name
+        };
+
+        await context.Invites.AddAsync(invite);
+        await context.SaveChangesAsync();
+        // TODO: make subscription and emit it
+        return true;
+    }
+
+    [Authorize]
+    public async Task<Room> AcceptInvite(
+        Guid inviteId,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] ApplicationContext context)
+    {
+        var userId = httpContextAccessor.GetUserIdFromJwt();
+
+        var invite = await  context.Invites.FirstOrDefaultAsync(x => x.Id == inviteId);
+
+        if (invite is null)
+        {
+            throw new Exception($"Couldn't find an invite with ID: {inviteId}");
+        }
+
+        if (invite.UserId != userId)
+        {
+            throw new Exception("You don't have access to this invite.");
+        }
+
+        var user = await context.Users.Include(x => x.Rooms).FirstOrDefaultAsync(x => x.Id == userId);
+        var room = await context.Rooms.FirstOrDefaultAsync(x => x.Id == invite.RoomId);
+        
+        if (room == null)
+        {
+            throw new Exception($"Couldn't find an room with ID: {invite.RoomId}");
+        } 
+        
+        user?.Rooms.Add(room);
+        context.Invites.Remove(invite);
+        
+        await context.SaveChangesAsync();
+        return room;
+    }
 }
