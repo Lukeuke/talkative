@@ -21,7 +21,7 @@ const httpLink = new HttpLink({
 });
 
 const wsLink = new WebSocketLink({
-      uri: 'ws://localhost:5251/graphql',
+      uri: '/graphql',
       connectionParams: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },

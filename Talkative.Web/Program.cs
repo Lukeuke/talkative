@@ -83,20 +83,6 @@ app.AddIdentityEndpoint();
 // GraphQL
 app.MapGraphQL();
 
-app.Use(async (context, next) =>
-{
-    if (context.WebSockets.IsWebSocketRequest)
-    {
-        var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        // Log connection details here
-        Console.WriteLine("WebSocket connection established.");
-    }
-    else
-    {
-        await next();
-    }
-});
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");
