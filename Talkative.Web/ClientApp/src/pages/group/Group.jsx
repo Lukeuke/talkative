@@ -40,6 +40,7 @@ const GET_ALL_MESSAGES = gql`
         id
         username
         fullName
+        onlineStatus
       }
     }
   }
