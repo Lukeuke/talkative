@@ -26,7 +26,7 @@ const wsLink = new WebSocketLink({
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       options: {
-        reconnect: true
+        reconnect: false
       }
     }
 );
@@ -44,8 +44,8 @@ const splitLink = split(
 );
 
 const client = new ApolloClient({
-  link: splitLink,
   cache: new InMemoryCache(),
+  link: splitLink,
 });
 
 export default client;

@@ -3,6 +3,14 @@ import { useParams } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import { validate as isUUID } from 'uuid';
 import { Message } from "../../components/Message/MessageComponent";
+import { createClient } from 'graphql-sse';
+
+const client = createClient({
+  url: '/graphql',
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+  }
+});
 
 const GET_ALL_MESSAGES = gql`
   query GetMessages($id: UUID) {
@@ -53,24 +61,6 @@ const SEND_MESSAGE = gql`
   }
 `;
 
-const MESSAGE_CREATED_SUBSCRIPTION = gql`
-  subscription MessageCreated($roomId: UUID!) {
-    messageCreated(roomId: $roomId) {
-      content
-      createdAt
-      editedAt
-      sender {
-        createdAt
-        email
-        firstName
-        fullName
-        lastName
-        username
-      }
-    }
-  }
-`;
-
 export default function GroupPage() {
   const { id } = useParams();
   const [message, setMessage] = useState('');
@@ -89,17 +79,40 @@ export default function GroupPage() {
     },
   });
 
-  useSubscription(MESSAGE_CREATED_SUBSCRIPTION, {
-    variables: { roomId: id },
-    onSubscriptionData: ({ subscriptionData }) => {
-      console.log("New message received:", subscriptionData.data);
-      const newMessage = subscriptionData.data.messageCreated;
-      setMessages(prevMessages => [...prevMessages, newMessage]);
-    },
-    onError: (error) => {
-      console.error("Subscription error:", error);
-    },
-  });
+  useEffect(() => {
+    const MESSAGES_QUERY = `subscription {
+      allGroupMessages {
+        content
+        createdAt
+        editedAt
+        roomId
+        sender {
+          createdAt
+          email
+          firstName
+          fullName
+          lastName
+          username
+        }
+      }
+    }`;
+
+    client.subscribe(
+        { query: MESSAGES_QUERY },
+        {
+          next(data) {
+            console.log('Received data:', data);
+            setMessages(prevMessages => [...prevMessages, data.data.allGroupMessages]);
+          },
+          error(err) {
+            console.error('Subscription error:', err);
+          },
+          complete() {
+            console.log('Subscription complete');
+          },
+        }
+    );
+  }, []);
 
   useEffect(() => {
     if (data?.allRooms?.[0]) {

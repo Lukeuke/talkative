@@ -2,6 +2,7 @@ import { Home } from "./components/Home";
 import SignIn from "./pages/identity/SignIn";
 import SignUp from "./pages/identity/SignUp";
 import GroupPage from "./pages/group/Group";
+import Test from "./pages/test/Test";
 
 const AppRoutes = [
   {
@@ -19,6 +20,10 @@ const AppRoutes = [
   {
     path: "/group/:id",
     element: <GroupPage />
+  },
+  {
+    path: "/test",
+    element: <Test />
   }
 ];
 

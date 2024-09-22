@@ -17,7 +17,9 @@ namespace Talkative.Application.Subscriptions;
 public class Subscription : IMessageSubscription
 {
     [Authorize]
+#pragma warning disable CS0618
     [SubscribeAndResolve]
+#pragma warning restore CS0618
     public async ValueTask<ISourceStream<Message>> MessageCreated(
         Guid roomId,
         [Service] ApplicationContext context,
@@ -46,7 +48,9 @@ public class Subscription : IMessageSubscription
     }
     
     [Authorize]
+#pragma warning disable CS0618
     [SubscribeAndResolve]
+#pragma warning restore CS0618
     public async ValueTask<ISourceStream<Message>> AllGroupMessages(
         [Service] ApplicationContext context,
         [Service] IHttpContextAccessor httpContextAccessor,
@@ -62,7 +66,6 @@ public class Subscription : IMessageSubscription
         {
             throw new Exception($"Couldn't find user with this ID: {userId}");
         }
-
 
         var userRoomIds = user.Rooms.Select(r => r.Id).ToHashSet(); // Zmieniamy na HashSet dla szybszego sprawdzania
 

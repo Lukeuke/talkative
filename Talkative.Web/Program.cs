@@ -55,13 +55,6 @@ builder.Services.AddGraphQLServer()
     .AddSorting()
     .AddAuthorization();
 
-builder.Services.AddCors(o => o.AddPolicy("all", b =>
-{
-    b.AllowAnyOrigin()
-        .AllowAnyMethod()
-        .AllowAnyHeader();
-}));
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -71,7 +64,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseCors("all");
+app.UseCors(b => b
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
 
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
