@@ -97,9 +97,55 @@ public class Subscription : IMessageSubscription
     {
         var userId = httpContextAccessor.GetUserIdFromJwt();
         
+        var user = await context.Users
+            .Include(x => x.Rooms)
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user == null)
+        {
+            throw new Exception($"Couldn't find user with this ID: {userId}");
+        }
+
+        var room = user.Rooms.FirstOrDefault(x => x.Id == Guid.Parse(roomId));
+        
+        if (room == null)
+        {
+            throw new Exception($"Couldn't find room with this ID: {roomId}");
+        }
+        
+        var subscription = await receiver.SubscribeAsync<UserStatus>("UserStatusChanged");
+        
+        var filteredStream = new FilteredSourceStream<UserStatus>(subscription, (status) =>
+        {
+            var userInRoom = context.Users
+                .Where(u => u.Id == status.UserId)
+                .Any(u => u.Rooms.Any(r => r.Id == Guid.Parse(roomId)));
+        
+            return userInRoom;
+        });
+
+        return filteredStream;
+    }
+
+    private Dictionary<Guid, DateTime> ConnectedUsers { get; set; } = new();
+    
+    [Authorize]
+#pragma warning disable CS0618
+    [SubscribeAndResolve]
+#pragma warning restore CS0618
+    public async ValueTask<ISourceStream<RoomStatus>> RoomStatus(
+        Guid roomId,
+        [Service] ITopicEventReceiver receiver,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] ApplicationContext context,
+        [Service] ITopicEventSender eventSender
+        )
+    {
+        var userId = httpContextAccessor.GetUserIdFromJwt();
+        
         var room = await context.Rooms
             .Include(x => x.Users)
-            .FirstOrDefaultAsync(x => x.Id == Guid.Parse(roomId));
+            .FirstOrDefaultAsync(x => x.Id == roomId);
 
         if (room == null)
         {
@@ -112,16 +158,107 @@ public class Subscription : IMessageSubscription
             throw new Exception("You are not in this room.");
         }
         
-        return await receiver.SubscribeAsync<UserStatus>(roomId);
-
-        /*if (roomId != status.RoomId)
+        /*if (!ConnectedUsers.ContainsKey(userId))
         {
-            return null;
+            ConnectedUsers[userId] = DateTime.UtcNow;
         }*/
         
-        // return status;
+        var stream = await receiver.SubscribeAsync<RoomStatus>($"RoomStatus_{roomId}");
+        
+        // _ = MonitorSubscriptionAsync(stream, eventSender, context, userId, roomId);
+
+        return stream;
+    }
+    
+    private async Task MonitorSubscriptionAsync(
+        ISourceStream stream, 
+        ITopicEventSender eventSender,
+        ApplicationContext context,
+        Guid userId, 
+        Guid roomId)
+    {
+        try
+        {
+            // Mark user as online
+            await UpdateUserStatusAsync(eventSender, context, userId, roomId, true);
+
+            var userIsActive = true;
+            var timeout = TimeSpan.FromSeconds(10);
+            var lastActivity = DateTime.UtcNow;
+
+            // Start a background task to monitor the user's activity
+            var timeoutTask = Task.Run(async () =>
+            {
+                while (userIsActive)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(10)); // Check every 30 seconds
+                    
+                    if (DateTime.UtcNow - lastActivity > timeout)
+                    {
+                        userIsActive = false;
+                        await UpdateUserStatusAsync(eventSender, context, userId, roomId, false);
+                        Console.WriteLine($"User {userId} timed out.");
+                        break;
+                    }
+                }
+            });
+
+            // Listen to the WebSocket stream
+            await foreach (var _ in stream.ReadEventsAsync())
+            {
+                // Each time we get a message, reset the activity timer
+                lastActivity = DateTime.UtcNow;
+            }
+
+            // Ensure the timeout task finishes when the stream ends
+            await timeoutTask;
+        }
+        catch (Exception ex)
+        {
+            await UpdateUserStatusAsync(eventSender, context, userId, roomId, false);
+            Console.WriteLine($"Subskrypcja dla użytkownika {userId} zakończyła się z błędem: {ex.Message}");
+        }
+        finally
+        {
+            await UpdateUserStatusAsync(eventSender, context, userId, roomId, false);
+            Console.WriteLine($"Użytkownik {userId} został usunięty z listy po rozłączeniu.");
+        }
+    }
+    
+    private async Task UpdateUserStatusAsync(
+        ITopicEventSender eventSender, 
+        ApplicationContext context, 
+        Guid userId, 
+        Guid roomId, 
+        bool isOnline)
+    {
+        if (isOnline)
+        {
+            ConnectedUsers[userId] = DateTime.UtcNow;
+        }
+        else
+        {
+            ConnectedUsers.Remove(userId);
+        }
+
+        var status = new UserStatus
+        {
+            UserId = userId,
+            IsOnline = isOnline
+        };
+
+        await eventSender.SendAsync(roomId.ToString(), status);
+
+        await context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(b => 
+                b.SetProperty(u => u.OnlineStatus, isOnline)
+            );
+
+        await context.SaveChangesAsync();
     }
 }
+
 
 public class FilteredSourceStream<T> : ISourceStream<T>
 {

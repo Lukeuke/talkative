@@ -43,6 +43,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Talkative.Application\Talkative.Application.csproj" />
       <ProjectReference Include="..\Talkative.Infrastructure\Talkative.Infrastructure.csproj" />
+      <ProjectReference Include="..\Talkative.Worker\Talkative.Worker.csproj" />
     </ItemGroup>
 
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

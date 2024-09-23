@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Talkative.Domain\Talkative.Domain.csproj" />
       <ProjectReference Include="..\Talkative.Infrastructure\Talkative.Infrastructure.csproj" />
+      <ProjectReference Include="..\Talkative.Worker\Talkative.Worker.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Talkative.Application", "Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Talkative.Infrastructure", "Talkative.Infrastructure\Talkative.Infrastructure.csproj", "{7691C40C-283D-4934-B431-DDB4E84E07AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Talkative.Worker", "Talkative.Worker\Talkative.Worker.csproj", "{60BE4DBC-06EF-48E3-8836-615FEC6F7BED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{7691C40C-283D-4934-B431-DDB4E84E07AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7691C40C-283D-4934-B431-DDB4E84E07AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7691C40C-283D-4934-B431-DDB4E84E07AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60BE4DBC-06EF-48E3-8836-615FEC6F7BED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60BE4DBC-06EF-48E3-8836-615FEC6F7BED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60BE4DBC-06EF-48E3-8836-615FEC6F7BED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60BE4DBC-06EF-48E3-8836-615FEC6F7BED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

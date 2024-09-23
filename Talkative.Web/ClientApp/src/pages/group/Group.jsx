@@ -1,10 +1,10 @@
 ﻿import { useQuery, gql, useMutation, useSubscription } from '@apollo/client';
 import { useParams } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
-import { validate as isUUID } from 'uuid';
 import { Message } from "../../components/Message/MessageComponent";
 import { createClient } from 'graphql-sse';
 import {UserPanel} from "../../components/Group/UserPanelComponent";
+import Spinner from "../../components/Shared/Spinner";
 
 const client = createClient({
   url: '/graphql',
@@ -132,11 +132,8 @@ export default function GroupPage() {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-
-  if (!isUUID(id)) {
-    return <p>Invalid room ID format</p>;
-  }
-  if (loading) return <></>;
+  
+  if (loading) return <Spinner />
   if (error) return <p>Error: {error.message}</p>;
 
   const room = data?.allRooms?.[0];

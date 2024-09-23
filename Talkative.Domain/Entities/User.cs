@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using HotChocolate;
 
 namespace Talkative.Domain.Entities;
 
@@ -18,8 +19,8 @@ public class User
     public required string LastName { get; set; }
     public required string Email { get; set; }
 
-    public required string PasswordHash { get; set; }
-    public string Salt { get; set; } = null!;
+    [GraphQLIgnore] public required string PasswordHash { get; set; }
+    [GraphQLIgnore] public string Salt { get; set; } = null!;
 
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";

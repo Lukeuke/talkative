@@ -49,7 +49,7 @@ export default function CreateGroup() {
               placeholder="Group Name"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              className="w-full rounded-full px-4 py-2 text-black"
+              className="w-full rounded-full px-4 py-2 text-black bg-MainSemiLight text-white"
               required
           />
           <button
@@ -57,7 +57,7 @@ export default function CreateGroup() {
               className="rounded-full bg-white/10 px-10 py-3 font-semibold transition hover:bg-white/20"
               disabled={loading}
           >
-            {loading ? "Creating..." : "Create Group"}
+            {loading ? "Creating..." : "Create"}
           </button>
         </form>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import CreateGroup from "./Group/CreateGroup";
 import { useQuery, gql, useMutation } from "@apollo/client";
 import { refreshNavMenu } from "./NavMenu";
+import Spinner from "./Shared/Spinner";
 
 const INVITES_QUERY = gql`query {
   allInvites {
@@ -45,12 +46,7 @@ export const Home = () => {
     },
   });
   
-  if (loading) return <div>Loading...</div>;
-  if (error) {
-    console.error("Error fetching invites:", error);
-    return <div>Error fetching invites</div>;
-  }
-
+  if (loading) return <Spinner />
   const invites = data.allInvites || [];
   const handleAccept = (inviteId) => {
     acceptInvite({ variables: { inviteId } });
@@ -59,8 +55,8 @@ export const Home = () => {
   return (
       <main className="flex min-h-screen text-white">
         <div className="grid grid-cols-1 md:grid-cols-3 w-full h-[100vh]">
-          <div className="bg-gray-800 h-full p-4 flex justify-center">Column 1</div>
-          <div className="bg-gray-700 h-full p-4 flex flex-col items-center justify-center">
+          <div className="bg-gray-600 h-full p-4 flex justify-center border-r-2 border-gray-500"></div>
+          <div className="bg-gray-600 h-full p-4 flex flex-col items-center gap-4 border-r-2 border-gray-500">
             <div className="text-[2rem] mb-4">Create a Group</div>
             <CreateGroup />
           </div>
