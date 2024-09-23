@@ -1,3 +1,5 @@
+![Build](https://github.com/Lukeuke/talkative/actions/workflows/build.yml/badge.svg)
+
 ## TODO:
 
 ### Frontend:
