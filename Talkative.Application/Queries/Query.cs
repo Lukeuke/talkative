@@ -1,5 +1,4 @@
-﻿using HotChocolate;
-using HotChocolate.Authorization;
+﻿using HotChocolate.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Talkative.Application.Helpers;
@@ -24,7 +23,7 @@ public class Query : IRoomQuery, IMessageQuery
             .Include(x => x.Rooms)
             .ThenInclude(x => x.Users)
             .ThenInclude(x => x.Messages)
-            .FirstOrDefaultAsync(x => x.Id == userId);
+            .FirstOrDefaultAsync(x => x.Id == userId); // TODO: optimize this
 
         if (user is null)
         {
@@ -68,8 +67,24 @@ public class Query : IRoomQuery, IMessageQuery
     [Authorize]
     [UseFiltering]
     [UseSorting]
-    public IEnumerable<Message> GetAllMessages(Guid groupId)
+    public IEnumerable<Message> GetAllMessages(
+            Guid groupId,
+            [Service] ApplicationContext context,
+            [Service] IHttpContextAccessor httpContextAccessor
+        )
     {
         return new List<Message>();
     }
+
+    /*[Authorize]
+    [UseFiltering]
+    [UseSorting]
+    public async Task<IEnumerable<RoomReadStatus>> GetReadStatus(
+        Guid roomId,
+        [Service] ApplicationContext context,
+        [Service] IHttpContextAccessor httpContextAccessor
+        )
+    {
+        
+    }*/
 }

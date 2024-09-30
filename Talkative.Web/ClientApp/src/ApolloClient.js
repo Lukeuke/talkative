@@ -21,15 +21,14 @@ const httpLink = new HttpLink({
 });
 
 const wsLink = new WebSocketLink({
-      uri: '/graphql',
-      connectionParams: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      options: {
-        reconnect: false
-      }
-    }
-);
+  uri: '/graphql',
+  options: {
+    reconnect: false,
+    connectionParams: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  }
+});
 console.log("WebSocket URL:", wsLink);
 const splitLink = split(
     ({ query }) => {

@@ -2,8 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+/*body {
     overflow: hidden;
+}*/
+
+@media (max-width: 768px) {
+    .flex-1-mobile {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 60px); /* Adjust as necessary */
+    }
 }
 
 .user-list {

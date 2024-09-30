@@ -21,23 +21,12 @@ public class BackgroundTaskQueue : IBackgroundTaskQueue
         _signal.Release();
     }
 
-    public async Task<UserStatus> DequeueTaskAsync(CancellationToken cancellationToken)
+    public async Task<UserStatus?> DequeueTaskAsync(CancellationToken cancellationToken)
     {
-        if (await _signal.WaitAsync(TimeSpan.FromSeconds(1), cancellationToken)) // 5-second timeout
-        {
-            _tasks.TryDequeue(out var taskInfo);
-            return taskInfo ?? new UserStatus
-            {
-                UserId = default,
-                IsOnline = false
-            };
-        }
+        if (!await _signal.WaitAsync(TimeSpan.FromSeconds(1), cancellationToken)) return null;
+        
+        _tasks.TryDequeue(out var taskInfo);
+        return taskInfo;
 
-        // Log the timeout scenario
-        return new UserStatus
-        {
-            UserId = default,
-            IsOnline = false // Return a default state when timing out
-        };
     }
 }

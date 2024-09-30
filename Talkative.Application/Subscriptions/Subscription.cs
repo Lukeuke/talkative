@@ -67,7 +67,7 @@ public class Subscription : IMessageSubscription
             throw new Exception($"Couldn't find user with this ID: {userId}");
         }
 
-        var userRoomIds = user.Rooms.Select(r => r.Id).ToHashSet(); // Zmieniamy na HashSet dla szybszego sprawdzania
+        var userRoomIds = user.Rooms.Select(r => r.Id).ToHashSet();
 
         if (userRoomIds.Count == 0)
         {
@@ -256,6 +256,95 @@ public class Subscription : IMessageSubscription
             );
 
         await context.SaveChangesAsync();
+    }
+    
+    /*[Subscribe]
+    [Topic("OnMessageReceived")]
+    public async ValueTask<ISourceStream<Message>> OnMessageReceived(
+        [EventMessage] Message message,
+        [Service] ITopicEventReceiver receiver,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] ApplicationContext context
+        )
+    {
+        var userId = httpContextAccessor.GetUserIdFromJwt();
+
+        var user = await context.Users
+            .Include(x => x.Rooms)
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user == null)
+        {
+            throw new Exception($"Couldn't find user with this ID: {userId}");
+        }
+
+        var userRoomIds = user.Rooms.Select(r => r.Id).ToHashSet();
+
+        if (userRoomIds.Count == 0)
+        {
+            throw new Exception($"User {userId} is not in any rooms.");
+        }
+        
+        var subscription = await receiver.SubscribeAsync<Message>("OnMessageReceived");
+
+        var filteredStream = new FilteredSourceStream<Message>(subscription, message => userRoomIds.Contains(message.RoomId));
+
+        return filteredStream;
+    }*/
+
+    /// <summary>
+    /// This method is only used for Web Socket connection for mobile
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="token"></param>
+    /// <param name="settings"></param>
+    /// <param name="context"></param>
+    /// <returns>message</returns>
+    /// <exception cref="Exception"></exception>
+    // [Authorize]
+    [Subscribe]
+    [Topic("OnMessageReceived")]
+    // NOTE: This should have Authorized header but somehow on client-side the Authorization header is being sent but on server it's not available :/
+    // Any custom sent header is not.
+    public async Task<Message?> OnMessageReceived(
+        [EventMessage] Message message,
+        string token, 
+        [Service] Settings settings,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] ApplicationContext context
+        ) 
+    {
+        if (!token.ValidateJwt(settings, out _))
+        {
+            throw new GraphQLException("Not authorized");
+        }
+        
+        var userId = token.GetUserIdFromJwt();
+        
+        // var userId = httpContextAccessor.GetUserIdFromJwt();
+        
+        var user = await context.Users
+            .Include(x => x.Rooms)
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user == null)
+        {
+            throw new GraphQLException($"Couldn't find user with this ID: {userId}");
+        }
+
+        var userRoomIds = user.Rooms.Select(r => r.Id).ToHashSet();
+
+        if (userRoomIds.Count == 0)
+        {
+            throw new GraphQLException($"User {userId} is not in any rooms.");
+        }
+        
+        if (!userRoomIds.Contains(message.RoomId))
+        {
+            return null;
+        }
+
+        return message;
     }
 }
 

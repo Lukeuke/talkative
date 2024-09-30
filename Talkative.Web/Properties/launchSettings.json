@@ -11,7 +11,7 @@
     "Talkative": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:7279;http://localhost:5251;https://192.168.1.100:7279;http://192.168.1.100:5251",
+      "applicationUrl": "https://localhost:7279;http://localhost:5251;https://192.168.1.109:7279;http://192.168.1.109:5251",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"

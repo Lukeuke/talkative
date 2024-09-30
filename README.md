@@ -12,3 +12,4 @@
 - [ ] subscription when user gets an invite
 - [ ] subscription when user joins room
 - [ ] message read status
+- [ ] pagination on query's

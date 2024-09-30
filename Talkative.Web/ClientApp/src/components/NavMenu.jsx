@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
 import './NavMenu.css';
 import HomeSvg from '../images/home.svg'
 import GroupSidebarComponent from "./Group/GroupSidebarComponent";
 import { useQuery, gql } from '@apollo/client';
+import {
+  getUnreadGroupsLocalStorage,
+  removeUnreadGroupLocalStorage,
+  setUnreadGroupsLocalStorage
+} from "../helpers/RoomUnreadStatusMock";
 
 const GET_ALL_ROOMS = gql`
   query {
@@ -18,6 +23,47 @@ const GET_ALL_ROOMS = gql`
 export const NavMenu = () => {
 
   const { loading, error, data } = useQuery(GET_ALL_ROOMS);
+
+  const [unreadGroups, setUnreadGroups] = useState([]);
+
+  const [refreshCounter, setRefreshCounter] = useState(0);
+  
+  const [isOpen, setIsOpen] = useState(false);
+
+  const refreshNavbar = () => {
+    console.log('refreshing navbar')
+    setRefreshCounter((prev) => prev + 1);
+  };
+  
+  useEffect(() => {
+    const fetchUnreadGroups = async () => {
+      const storedUnreadGroups = await getUnreadGroupsLocalStorage();
+      setUnreadGroups(storedUnreadGroups);
+    };
+    fetchUnreadGroups();
+  }, []);
+
+  const [startTouchX, setStartTouchX] = useState(0);
+  const [endTouchX, setEndTouchX] = useState(0);
+  
+  const handleTouchStart = (e) => {
+    setStartTouchX(e.touches[0].clientX); // Get initial touch position
+  };
+
+  const handleTouchMove = (e) => {
+    setEndTouchX(e.touches[0].clientX); // Update touch position
+  };
+
+  const handleTouchEnd = () => {
+    const threshold = 50; // Minimum swipe distance to trigger action
+    if (startTouchX + threshold < endTouchX) {
+      // Swipe right
+      setIsOpen(true);
+    } else if (startTouchX - threshold > endTouchX) {
+      // Swipe left
+      setIsOpen(false);
+    }
+  };
   
   if (loading) {
     return (
@@ -34,7 +80,6 @@ export const NavMenu = () => {
     );
   }
   if (error) {
-    console.error(error.message);
     return null;
   }
 
@@ -46,9 +91,11 @@ export const NavMenu = () => {
           </Link>
         </div>
         <nav className="flex flex-col space-y-[10px] pt-[10px]">
-          {data.allRooms.map((group) => (
-              <GroupSidebarComponent key={group.id} {...group} id={group.id} />
-          ))}
+          {data.allRooms.map((group) => {
+            return (
+                <GroupSidebarComponent key={group.id} {...group} id={group.id} unread={unreadGroups.find(e => e === group.id)} refreshNavbar={refreshNavbar} />
+            )}
+          )}
 
           {/*<CreateGroupPopup />*/}
         </nav>
@@ -58,4 +105,12 @@ export const NavMenu = () => {
 
 export const refreshNavMenu = (refetch) => {
   refetch();
+};
+
+export const setUnreadGroupsHook = async (groupId, isRead) => {
+  if (isRead) {
+    await removeUnreadGroupLocalStorage(groupId);
+  } else {
+    await setUnreadGroupsLocalStorage(groupId);
+  }
 };

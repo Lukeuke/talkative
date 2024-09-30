@@ -1,14 +1,9 @@
-﻿/*
-html {
-  font-size: 14px;
+﻿.ping {
+    position: absolute;
+    right: -5px;
+    top: 5px;
+    background-color: red;
+    border-radius: 50%;
+    height: 10px;
+    width: 10px;
 }
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-}
-*/

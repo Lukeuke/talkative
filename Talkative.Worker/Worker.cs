@@ -30,33 +30,41 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("Attempting to dequeue a task at {time}", DateTimeOffset.UtcNow);
+            //_logger.LogInformation("Attempting to dequeue a task at {time}", DateTimeOffset.UtcNow);
             var userStatus = await _taskQueue.DequeueTaskAsync(stoppingToken);
             
             if (userStatus == null)
             {
-                _logger.LogWarning("No tasks in the queue. Waiting for new tasks...");
-                continue;  // No tasks, wait for the next iteration
+                //_logger.LogWarning("No tasks in the queue. Waiting for new tasks...");
             }
-            _logger.LogInformation("Dequeued userStatus: {userId}", userStatus.UserId);
+            else
+            {
+                _logger.LogInformation("Dequeued userStatus: {userId}", userStatus.UserId);
 
-            ConnectedUsers[userStatus.UserId] = DateTime.UtcNow;
+                ConnectedUsers[userStatus.UserId] = DateTime.UtcNow;
+            }
 
+            // Users who are not sent a ping for more than 30 seconds
             var usersWhoDisconnected = ConnectedUsers.Where(x => x.Value < DateTimeOffset.UtcNow.AddSeconds(-30));
 
             foreach (var (userId, _) in usersWhoDisconnected)
             {
-                ConnectedUsers.Remove(userStatus.UserId);
+                ConnectedUsers.Remove(userId);
                 await _userStatusHelper.UpdateUserStatus(userId, false);
                 await _eventSender.SendAsync("UserStatusChanged", new UserStatus
                 {
                     UserId = userId,
                     IsOnline = false
                 }, stoppingToken);
+                
+                _logger.LogInformation("User status set to false: {userId}", userId);
             }
-            
-            _logger.LogInformation(userStatus.ToString());
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+
+            if (userStatus is not null)
+            {
+                _logger.LogInformation(userStatus.ToString());
+            }
+            // _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
             await Task.Delay(1000, stoppingToken);
         }

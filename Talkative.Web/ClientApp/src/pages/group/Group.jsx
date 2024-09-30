@@ -5,6 +5,7 @@ import { Message } from "../../components/Message/MessageComponent";
 import { createClient } from 'graphql-sse';
 import {UserPanel} from "../../components/Group/UserPanelComponent";
 import Spinner from "../../components/Shared/Spinner";
+import {setUnreadGroupsHook} from "../../components/NavMenu";
 
 const client = createClient({
   url: '/graphql',
@@ -63,7 +64,7 @@ const SEND_MESSAGE = gql`
   }
 `;
 
-export default function GroupPage() {
+export default function GroupPage( {refreshNavbar}) {
   const { id } = useParams();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
@@ -105,7 +106,11 @@ export default function GroupPage() {
           next(data) {
             console.log('Received data:', data);
             
-            if (data.data.allGroupMessages.roomId !== id) {
+            let roomId = data.data.allGroupMessages.roomId;
+            
+            if (roomId !== id) {
+              setUnreadGroupsHook(roomId, false);
+              refreshNavbar();
               return;
             }
             
@@ -150,7 +155,7 @@ export default function GroupPage() {
 
   return (
       <div className="flex flex-col md:flex-row h-screen bg-MainSemiLight">
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col flex-1-mobile">
           <h1 className="text-xl font-bold border-b border-MainLight text-white p-4">
             {room ? room.name : 'Loading Room...'}
           </h1>

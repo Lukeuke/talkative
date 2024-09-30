@@ -5,5 +5,5 @@ namespace Talkative.Worker;
 public interface IBackgroundTaskQueue
 {
     void EnqueueTask(UserStatus task);
-    Task<UserStatus> DequeueTaskAsync(CancellationToken cancellationToken);
+    Task<UserStatus?> DequeueTaskAsync(CancellationToken cancellationToken);
 }

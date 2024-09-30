@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import CreateGroup from "./Group/CreateGroup";
 import { useQuery, gql, useMutation } from "@apollo/client";
-import { refreshNavMenu } from "./NavMenu";
+import {refreshNavMenu, setUnreadGroupsHook} from "./NavMenu";
 import Spinner from "./Shared/Spinner";
+import client from "../ApolloClient";
 
 const INVITES_QUERY = gql`query {
   allInvites {
@@ -33,7 +34,13 @@ const GET_ALL_ROOMS = gql`
 `;
 
 export const Home = () => {
-  const { loading, error, data } = useQuery(INVITES_QUERY);
+  const { loading, error, data } = useQuery(INVITES_QUERY, {
+    onError: (error) => {
+      if (error.message === "The current user is not authorized to access this resource.") {
+        window.localStorage.removeItem("token");
+      }
+    }
+  });
 
   const { refetch: refetchRooms } = useQuery(GET_ALL_ROOMS);
 

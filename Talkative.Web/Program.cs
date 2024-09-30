@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Talkative.Application.Interceptors;
 using Talkative.Application.Mutations;
 using Talkative.Application.Queries;
 using Talkative.Application.Subscriptions;
@@ -52,9 +53,11 @@ builder.Services.AddGraphQLServer()
     .AddMutationType<Mutation>()
     .AddSubscriptionType<Subscription>()
     .AddInMemorySubscriptions()
+    /*.AddSocketSessionInterceptor<SocketSessionInterceptor>()*/
     .AddFiltering()
     .AddSorting()
-    .AddAuthorization();
+    .AddAuthorization()
+    .ModifyRequestOptions(x => x.IncludeExceptionDetails = true);
 
 var app = builder.Build();
 

@@ -15,16 +15,22 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<User>().HasMany(x => x.Messages);
         modelBuilder.Entity<User>().HasMany(x => x.Rooms);
         modelBuilder.Entity<User>().HasMany(x => x.Invites);
+        // modelBuilder.Entity<User>().HasMany(x => x.RoomReadStatus);
 
         modelBuilder.Entity<Room>().HasMany(x => x.Messages);
         modelBuilder.Entity<Room>().HasMany(x => x.Users);
         
         modelBuilder.Entity<Message>().HasOne(x => x.Room);
         modelBuilder.Entity<Message>().HasOne(x => x.Sender);
+
+        /*modelBuilder.Entity<RoomReadStatus>().HasOne(x => x.Room);
+        modelBuilder.Entity<RoomReadStatus>().HasOne(x => x.User);
+        modelBuilder.Entity<RoomReadStatus>().HasOne(x => x.LastReadMessage);*/
     }
 
     public DbSet<User> Users { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Invite> Invites { get; set; }
+    // public DbSet<RoomReadStatus> RoomReadStatus { get; set; }
 }

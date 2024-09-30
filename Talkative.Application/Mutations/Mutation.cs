@@ -101,6 +101,7 @@ public class Mutation : IRoomMutation, IMessageMutation
 
         // await sender.SendAsync($"MessageCreated_{roomId}", message);
         await sender.SendAsync($"MessageCreated", message);
+        await sender.SendAsync("OnMessageReceived", message);
         Console.WriteLine($"Message sent to room {roomId} by user {userId}");
         
         return message;
