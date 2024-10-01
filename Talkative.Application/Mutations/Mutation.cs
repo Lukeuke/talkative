@@ -36,7 +36,7 @@ public class Mutation : IRoomMutation, IMessageMutation
 
         if (user is null)
         {
-            throw new Exception($"User with ID: {userId} was not found.");
+            throw new GraphQLException($"User with ID: {userId} was not found.");
         }
         
         user.Rooms.Add(room);
@@ -53,7 +53,7 @@ public class Mutation : IRoomMutation, IMessageMutation
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw new Exception("An error occurred while creating the room.", ex);
+            throw new GraphQLException("An error occurred while creating the room.", ex);
         }
 
         return room;
@@ -76,14 +76,14 @@ public class Mutation : IRoomMutation, IMessageMutation
 
         if (room == null)
         {
-            throw new Exception("Room was not found");
+            throw new GraphQLException("Room was not found");
         }
 
         var hasUser = room.Users.Any(x => x.Id == userId);
 
         if (!hasUser)
         {
-            throw new Exception("You are not part of this room and cannot send messages.");
+            throw new GraphQLException("You are not part of this room and cannot send messages.");
         }
 
         var message = new Message
@@ -192,12 +192,12 @@ public class Mutation : IRoomMutation, IMessageMutation
 
         if (invite is null)
         {
-            throw new Exception($"Couldn't find an invite with ID: {inviteId}");
+            throw new GraphQLException($"Couldn't find an invite with ID: {inviteId}");
         }
 
         if (invite.UserId != userId)
         {
-            throw new Exception("You don't have access to this invite.");
+            throw new GraphQLException("You don't have access to this invite.");
         }
 
         var user = await context.Users.Include(x => x.Rooms).FirstOrDefaultAsync(x => x.Id == userId);
@@ -205,7 +205,7 @@ public class Mutation : IRoomMutation, IMessageMutation
         
         if (room == null)
         {
-            throw new Exception($"Couldn't find an room with ID: {invite.RoomId}");
+            throw new GraphQLException($"Couldn't find an room with ID: {invite.RoomId}");
         } 
         
         user?.Rooms.Add(room);

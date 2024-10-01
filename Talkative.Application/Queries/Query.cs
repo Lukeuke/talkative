@@ -27,7 +27,7 @@ public class Query : IRoomQuery, IMessageQuery
 
         if (user is null)
         {
-            throw new Exception($"User with ID: {userId} was not found.");
+            throw new GraphQLException($"User with ID: {userId} was not found.");
         }
 
         foreach (var room in user.Rooms)

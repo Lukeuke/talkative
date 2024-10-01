@@ -1,9 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using HotChocolate;
-using HotChocolate.Authorization;
+﻿using HotChocolate.Authorization;
 using HotChocolate.Execution;
 using HotChocolate.Subscriptions;
-using HotChocolate.Types;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Talkative.Application.Helpers;
