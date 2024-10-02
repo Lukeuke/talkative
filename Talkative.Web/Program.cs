@@ -10,7 +10,6 @@ using Talkative.Domain.Models;
 using Talkative.Infrastructure.Context;
 using Talkative.Web.Modules.Identity;
 using Talkative.Web.Mounts;
-using Talkative.Worker;
 
 var builder = WebApplication.CreateBuilder(args);
 

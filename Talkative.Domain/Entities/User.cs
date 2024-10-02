@@ -32,4 +32,5 @@ public class User
     public virtual List<Message> Messages { get; set; } = null!;
     public virtual List<Invite> Invites { get; set; } = null!;
     // public virtual List<RoomReadStatus> RoomReadStatus { get; set; } = null!;
+    public ICollection<UserDevice> Devices { get; set; } = null!;
 }

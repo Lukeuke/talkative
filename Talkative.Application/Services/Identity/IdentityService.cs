@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Primitives;
 using Talkative.Application.DTOs.Identity.SignIn;
 using Talkative.Application.DTOs.Identity.SignUp;
 using Talkative.Application.DTOs.Other;
 using Talkative.Application.Enums;
 using Talkative.Application.Helpers;
+using Talkative.Application.Services.Device;
 using Talkative.Domain.Entities;
 using Talkative.Domain.Models;
 using Talkative.Infrastructure.Repositories.Abstraction;
@@ -17,17 +19,21 @@ public class IdentityService : IIdentityService
     private readonly BaseRepository<User> _userRepository;
     private readonly IMapper _mapper;
     private readonly Settings _settings;
+    private readonly IMobileDeviceService _mobileDeviceService;
 
     public IdentityService(
         IUserRepository repository,
         BaseRepository<User> userRepository,
         IMapper mapper,
-        Settings settings)
+        Settings settings,
+        IMobileDeviceService mobileDeviceService
+        )
     {
         _repository = repository;
         _userRepository = userRepository;
         _mapper = mapper;
         _settings = settings;
+        _mobileDeviceService = mobileDeviceService;
     }
 
     public async Task<(bool, object)> SignUpAsync(SignUpRequestDto requestDto)
@@ -71,7 +77,7 @@ public class IdentityService : IIdentityService
         }
     }
 
-    public async Task<(EResponseStatusCode, object)> SignInAsync(SignInRequestDto requestDto)
+    public async Task<(EResponseStatusCode, object)> SignInAsync(SignInRequestDto requestDto, StringValues deviceType, string? expoPushToken = null)
     {
         var user = await _repository.GetUserByEmailAsync(requestDto.Email);
 
@@ -85,7 +91,12 @@ public class IdentityService : IIdentityService
             return (EResponseStatusCode.BadRequest, new MessageResponseDto("Password is not valid."));
         }
 
-        // var userClaimsModel = _mapper.Map<UserClaimsModel>(user);
+        if (deviceType.Equals("Mobile") && !string.IsNullOrEmpty(expoPushToken))
+        {
+            await _mobileDeviceService.AssociatePushTokenWithUser(user.Id, expoPushToken);
+        }
+        
+        // var userClaimsModel = _mapper.Map<UserClaimsModel>(user); // TODO
 
         var token = AuthenticationHelper.GenerateJwt(AuthenticationHelper.AssembleClaimsIdentity(user), _settings);
 
