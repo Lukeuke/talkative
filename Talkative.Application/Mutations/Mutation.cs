@@ -1,5 +1,4 @@
-﻿using HotChocolate;
-using HotChocolate.Authorization;
+﻿using HotChocolate.Authorization;
 using HotChocolate.Subscriptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -213,5 +212,38 @@ public class Mutation : IRoomMutation, IMessageMutation
         
         await context.SaveChangesAsync();
         return room;
+    }
+
+    [Authorize]
+    public async Task<bool> UpdateReadStatus(
+        Guid roomId,
+        Guid lastReadMessageId,
+        [Service] IHttpContextAccessor httpContextAccessor,
+        [Service] ApplicationContext context
+    )
+    {
+        var userId = httpContextAccessor.GetUserIdFromJwt();
+        var readStatus = context.RoomReadStatus
+            .FirstOrDefault(r => r.RoomId == roomId && r.UserId == userId);
+
+        if (readStatus != null)
+        {
+            readStatus.LastReadMessageId = lastReadMessageId;
+            readStatus.UpdatedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            await context.SaveChangesAsync();
+        }
+        else
+        {
+            context.RoomReadStatus.Add(new RoomReadStatus
+            {
+                UserId = userId,
+                RoomId = roomId,
+                LastReadMessageId = lastReadMessageId,
+                UpdatedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+            });
+            await context.SaveChangesAsync();
+        }
+
+        return true;
     }
 }

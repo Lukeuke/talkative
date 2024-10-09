@@ -9,6 +9,7 @@ public class Room
     [MaxLength(255)]
     public required string Name { get; set; }
 
+    public string ImageUrl { get; set; } = " ";
     public required Guid OwnerId { get; set; }
 
     [UseFiltering]

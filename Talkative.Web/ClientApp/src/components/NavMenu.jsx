@@ -9,12 +9,14 @@ import {
   removeUnreadGroupLocalStorage,
   setUnreadGroupsLocalStorage
 } from "../helpers/RoomUnreadStatusMock";
+import UserProfile from "./UserProfile";
 
 const GET_ALL_ROOMS = gql`
   query {
     allRooms {
       id
       name
+      imageUrl
       ownerId
     }
   }
@@ -84,21 +86,30 @@ export const NavMenu = () => {
   }
 
   return (
-      <div className="h-screen w-[80px] bg-[#313137] text-white flex flex-col items-center">
+      <div className="h-screen w-[80px] bg-[#313137] text-white flex flex-col items-center justify-between">
         <div className='py-[10px]'>
           <Link href={"/"} to={"/"}>
             <img src={HomeSvg} alt="Home" />
           </Link>
         </div>
-        <nav className="flex flex-col space-y-[10px] pt-[10px]">
+
+        <nav className="flex flex-col space-y-[10px] pt-[10px] flex-1">
           {data.allRooms.map((group) => {
             return (
-                <GroupSidebarComponent key={group.id} {...group} id={group.id} unread={unreadGroups.find(e => e === group.id)} refreshNavbar={refreshNavbar} />
-            )}
-          )}
-
-          {/*<CreateGroupPopup />*/}
+                <GroupSidebarComponent
+                    key={group.id}
+                    {...group}
+                    id={group.id}
+                    unread={unreadGroups.find(e => e === group.id)}
+                    refreshNavbar={refreshNavbar}
+                />
+            );
+          })}
         </nav>
+
+        <div className="py-[10px]">
+          <UserProfile />
+        </div>
       </div>
   );
 };

@@ -8,10 +8,19 @@ using Talkative.Application.Queries;
 using Talkative.Application.Subscriptions;
 using Talkative.Domain.Models;
 using Talkative.Infrastructure.Context;
+using Talkative.Web.Modules.Cdn;
 using Talkative.Web.Modules.Identity;
 using Talkative.Web.Mounts;
+using Path = System.IO.Path;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var assetsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Talkative", "assets");
+
+if (!Directory.Exists(assetsPath))
+{
+    Directory.CreateDirectory(assetsPath);
+}
 
 // Add services to the container.
 var settings = new Settings();
@@ -82,6 +91,7 @@ app.UseAuthorization();
 
 // REST API
 app.AddIdentityEndpoint();
+app.AddCdnEndpoint();
 
 // GraphQL
 app.MapGraphQL();

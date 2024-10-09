@@ -38,6 +38,7 @@ export const Home = () => {
     onError: (error) => {
       if (error.message === "The current user is not authorized to access this resource.") {
         window.localStorage.removeItem("token");
+        window.location.replace("/sign-in")
       }
     }
   });
