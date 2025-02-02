@@ -9,7 +9,7 @@ public static class CdnModule
 {
     public static void AddCdnEndpoint(this WebApplication app)
     {
-        // r_(guid) = room profile
+        // r_(guid:roomId) = room profile
         app.MapGet("api/cdn/{id}", async (string id) =>
         {
             var assetsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Talkative", "assets");
@@ -28,6 +28,7 @@ public static class CdnModule
             return Results.File(imageBytes, contentType);
         });
         
+        // u_(guid:userId) = user profile
         app.MapGet("api/cdn/user/{id}", async (
             Guid id,
             [FromServices] BaseRepository<User> userRepository

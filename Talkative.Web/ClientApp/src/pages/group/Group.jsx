@@ -35,6 +35,7 @@ const GET_ALL_MESSAGES = gql`
           id
           lastName
           username
+          imageUrl
         }
       }
       users {
@@ -96,6 +97,7 @@ export default function GroupPage( {refreshNavbar}) {
           fullName
           lastName
           username
+          imageUrl
         }
       }
     }`;

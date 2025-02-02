@@ -10,6 +10,7 @@ using Talkative.Domain.Entities;
 using Talkative.Domain.Models;
 using Talkative.Infrastructure.Repositories.Abstraction;
 using Talkative.Infrastructure.Repositories.User;
+using Path = System.IO.Path;
 
 namespace Talkative.Application.Services.Identity;
 
@@ -58,6 +59,7 @@ public class IdentityService : IIdentityService
             PasswordHash = requestDto.Password,
             Email = requestDto.Email,
             Salt = "",
+            ImageUrl = $"default-user-profile-{Random.Shared.Next(0, 3)}.png",
             CreatedAt = DateTimeOffset.Now.ToUnixTimeSeconds()
         };
 

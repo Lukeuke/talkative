@@ -57,6 +57,39 @@ public class Mutation : IRoomMutation, IMessageMutation
 
         return room;
     }
+
+    [Authorize]
+    public async Task<bool> DeleteRoom(
+        Guid roomId,
+        [Service] ApplicationContext dbContext, 
+        [Service] IHttpContextAccessor httpContextAccessor
+        )
+    {
+        var userId = httpContextAccessor.GetUserIdFromJwt();
+        
+        var room = await dbContext.Rooms
+            .Include(r => r.Messages)
+            .FirstOrDefaultAsync(r => r.Id == roomId && r.OwnerId == userId);
+
+        if (room == null)
+        {
+            return false;
+        }
+
+        try
+        {
+            dbContext.Rooms.Remove(room);
+
+            await dbContext.SaveChangesAsync();
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            throw new GraphQLException(e.Message);
+        }
+
+    }
     
     [Authorize]
     public async Task<Message> SendMessage(

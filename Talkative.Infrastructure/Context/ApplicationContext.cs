@@ -17,7 +17,7 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<User>().HasMany(x => x.Invites);
         modelBuilder.Entity<User>().HasMany(x => x.Devices);
 
-        modelBuilder.Entity<Room>().HasMany(x => x.Messages);
+        modelBuilder.Entity<Room>().HasMany(x => x.Messages).WithOne(x => x.Room).HasForeignKey(x => x.RoomId).OnDelete(DeleteBehavior.Cascade);;
         modelBuilder.Entity<Room>().HasMany(x => x.Users);
         
         modelBuilder.Entity<Message>().HasOne(x => x.Room);
